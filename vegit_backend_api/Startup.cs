@@ -1,15 +1,13 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using vegit_backend_api.Interfaces;
+using vegit_backend_api.Services;
+using vegit_backend_api.Services.Abstract;
+using vegit_backend_api.Services.Helpers;
 
 namespace vegit_backend_api
 {
@@ -26,6 +24,22 @@ namespace vegit_backend_api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddSingleton<IConfiguration>(Configuration);
+
+            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
+            {
+                SqlHelper.connectionString = Configuration.GetConnectionString("ProdDBConnection");
+            }
+            else
+            {
+                SqlHelper.connectionString = Configuration.GetConnectionString("LocalDBConnection");
+
+                // local database migration
+                // services.BuildServiceProvider().GetService<DatabaseContext>().Database.Migrate();
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
