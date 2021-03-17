@@ -29,17 +29,9 @@ namespace vegit_backend_api
             services.AddScoped<IUserService, UserService>();
             services.AddSingleton<IConfiguration>(Configuration);
 
-            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
-            {
-                SqlHelper.connectionString = Configuration.GetConnectionString("ProdDBConnection");
-            }
-            else
-            {
-                SqlHelper.connectionString = Configuration.GetConnectionString("LocalDBConnection");
+            SqlHelper.connectionString = Configuration.GetConnectionString("ProdDBConnection");
 
-                // local database migration
-                // services.BuildServiceProvider().GetService<DatabaseContext>().Database.Migrate();
-            }
+            services.AddSwaggerGen();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -54,6 +46,13 @@ namespace vegit_backend_api
                 // For mobile apps, allow http traffic.
                 app.UseHttpsRedirection();
             }
+
+            app.UseSwagger();
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "V1");
+            });
 
             app.UseRouting();
 

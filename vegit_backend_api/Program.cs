@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Azure.Identity;
+using Microsoft.Extensions.Configuration;
+using System;
 
 namespace vegit_backend_api
 {
@@ -13,9 +16,11 @@ namespace vegit_backend_api
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .ConfigureLogging(logging =>
+                .ConfigureAppConfiguration((context, config) =>
                 {
-                    logging.AddAzureWebAppDiagnostics();
+                    var keyVaultEndpoint = new Uri(Environment.GetEnvironmentVariable("VaultUri"));
+                    Console.WriteLine(keyVaultEndpoint);
+                    config.AddAzureKeyVault(keyVaultEndpoint, new DefaultAzureCredential());
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {

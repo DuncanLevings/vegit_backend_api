@@ -9,7 +9,6 @@ using vegit_backend_api.Models;
 namespace vegit_backend_api.Controllers
 {
     [ApiController]
-    [Route("vegit/[controller]/[action]")]
     public class UsersController : ControllerBase
     {
         private readonly IUserRepository _userRepository;
@@ -20,16 +19,14 @@ namespace vegit_backend_api.Controllers
             _userRepository = userRepository;
         }
 
-        // vegit/users/getall
-        [HttpGet]
+        [HttpGet("/users/getall")]
         public async Task<ActionResult> GetAll()
         {
             var userList = await _userRepository.GetAll();
             return StatusCode(200, userList);
         }
 
-        // vegit/users/get/id
-        [HttpGet("{id}")]
+        [HttpGet("/users/get/{id}")]
         public async Task<ActionResult> GetById(int id)
         {
             var user = await _userRepository.GetById(id);
@@ -39,8 +36,7 @@ namespace vegit_backend_api.Controllers
             return StatusCode(200, user);
         }
 
-        // vegit/users/add
-        [HttpPost]
+        [HttpPost("/users/add")]
         public async Task<ActionResult> Add([FromBody] User user)
         {
             var result = await _userRepository.Add(user);
@@ -51,8 +47,7 @@ namespace vegit_backend_api.Controllers
             return StatusCode(201);
         }
 
-        // vegit/users/login
-        [HttpPost]
+        [HttpPost("/users/login")]
         public async Task<ActionResult> Login([FromBody] Login login)
         {
             var result = await _userRepository.Login(login);
