@@ -44,7 +44,27 @@ namespace vegit_backend_api.Controllers
             if (!result.Item2)
                 return StatusCode(500, new ErrorModel { ErrorMessage = result.Item1 });
 
-            return StatusCode(201);
+            return StatusCode(201, result.Item3);
+        }
+
+        [HttpDelete("/users/delete/{id}")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            var isDeleted = await _userRepository.Delete(id);
+            if (!isDeleted)
+                return StatusCode(403, new ErrorModel { ErrorMessage = String.Format(ERROR_MESSAGE, id) });
+
+            return StatusCode(204);
+        }
+
+        [HttpPut("/users/update/{id}")]
+        public async Task<ActionResult> Update(int id, [FromBody] User user)
+        {
+            var isUpdated = await _userRepository.Update(id, user);
+            if (!isUpdated)
+                return StatusCode(403, new ErrorModel { ErrorMessage = String.Format(ERROR_MESSAGE, id) });
+
+            return StatusCode(204);
         }
 
         [HttpPost("/users/login")]
@@ -55,7 +75,7 @@ namespace vegit_backend_api.Controllers
             if (!result.Item2)
                 return StatusCode(401, new ErrorModel { ErrorMessage = result.Item1 });
 
-            return StatusCode(200);
+            return StatusCode(200, result.Item3);
         }
     }
 }

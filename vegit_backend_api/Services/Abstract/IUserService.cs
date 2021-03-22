@@ -8,6 +8,6 @@ namespace vegit_backend_api.Services.Abstract
 {
     public interface IUserService : IService<User>
     {
-        Task<(string, bool)> Login(Login login);
+        Task<(string, bool, User)> Login(Login login);
     }
 }

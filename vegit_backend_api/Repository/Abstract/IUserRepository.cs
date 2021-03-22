@@ -9,6 +9,6 @@ namespace vegit_backend_api.Interfaces
 {
     public interface IUserRepository : IRepository<User>
     {
-        Task<(string, bool)> Login(Login login);
+        Task<(string, bool, User)> Login(Login login);
     }
 }

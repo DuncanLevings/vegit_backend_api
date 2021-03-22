@@ -61,7 +61,7 @@ namespace vegit_backend_api.Services
                 return null;
             }
         }
-        public async Task<(string, bool)> Add(User model)
+        public async Task<(string, bool, User)> Add(User model)
         {
             try
             {
@@ -74,27 +74,62 @@ namespace vegit_backend_api.Services
                                 param,
                                 commandType: CommandType.StoredProcedure);
 
-                    return (param.Get<String>("responseMessage"), param.Get<Boolean>("successVal"));
+                    User user = null;
+                    if (param.Get<Int32>("userId") > -1)
+                    {
+                        user = await GetById(param.Get<Int32>("userId"));
+                    }
+
+                    return (param.Get<String>("responseMessage"), param.Get<Boolean>("successVal"), user);
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return (ex.Message, false);
+                return (ex.Message, false, null);
             }
         }
 
-        public Task<bool> Delete(int id)
+        public async Task<bool> Delete(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                using (IDbConnection connection = new SqlConnection(SqlHelper.connectionString))
+                {
+                    if (connection.State == ConnectionState.Closed) connection.Open();
+
+                    await connection.QueryAsync($"DELETE USERS WHERE Id = {id}");
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
         }
 
-        public Task<bool> Update(int id, User model)
+        public async Task<bool> Update(int id, User model)
         {
-            throw new NotImplementedException();
+            try
+            {
+                using (IDbConnection connection = new SqlConnection(SqlHelper.connectionString))
+                {
+                    if (connection.State == ConnectionState.Closed) connection.Open();
+
+                    var query = @"UPDATE USERS SET firstName = @firstName, lastName = @lastName WHERE Id = " + id;
+                    await connection.ExecuteAsync(query, model);
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
         }
 
-        public async Task<(string, bool)> Login(Login login)
+        public async Task<(string, bool, User)> Login(Login login)
         {
             try
             {
@@ -107,13 +142,19 @@ namespace vegit_backend_api.Services
                                 param,
                                 commandType: CommandType.StoredProcedure);
 
-                    return (param.Get<String>("responseMessage"), param.Get<Boolean>("successVal"));
+                    User user = null;
+                    if (param.Get<Int32>("userId") > -1)
+                    {
+                        user = await GetById(param.Get<Int32>("userId"));
+                    }
+
+                    return (param.Get<String>("responseMessage"), param.Get<Boolean>("successVal"), user);
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return (ex.Message, false);
+                return (ex.Message, false, null);
             }
         }
 
@@ -127,6 +168,7 @@ namespace vegit_backend_api.Services
 
             parameters.Add("@responseMessage", dbType: DbType.String, direction: ParameterDirection.Output, size: 250);
             parameters.Add("@successVal", dbType: DbType.Boolean, direction: ParameterDirection.Output);
+            parameters.Add("@userId", dbType: DbType.Int32, direction: ParameterDirection.Output);
 
             return parameters;
         }
@@ -139,6 +181,7 @@ namespace vegit_backend_api.Services
 
             parameters.Add("@responseMessage", dbType: DbType.String, direction: ParameterDirection.Output, size: 250);
             parameters.Add("@successVal", dbType: DbType.Boolean, direction: ParameterDirection.Output);
+            parameters.Add("@userId", dbType: DbType.Int32, direction: ParameterDirection.Output);
 
             return parameters;
         }

@@ -9,7 +9,7 @@ namespace vegit_backend_api.Repository.Abstract
     {
         Task<List<T>> GetAll();
         Task<T> GetById(int id);
-        Task<(string, bool)> Add(T model);
+        Task<(string, bool, T model)> Add(T model);
         Task<bool> Delete(int id);
         Task<bool> Update(int id, T model);
     }

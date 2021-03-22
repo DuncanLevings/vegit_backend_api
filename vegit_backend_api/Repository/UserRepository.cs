@@ -34,22 +34,34 @@ namespace vegit_backend_api.Services
             return null;
         }
 
-        public async Task<(string, bool)> Add(User model)
+        public async Task<(string, bool, User)> Add(User model)
         {
             return await _userService.Add(model);
         }
 
-        public Task<bool> Delete(int id)
+        public async Task<bool> Delete(int id)
         {
-            throw new System.NotImplementedException();
+            var data = await GetById(id);
+            if (data != null)
+            {
+                var result = await _userService.Delete(id);
+                return result;
+            }
+            return false;
         }
 
-        public Task<bool> Update(int id, User model)
+        public async Task<bool> Update(int id, User model)
         {
-            throw new System.NotImplementedException();
+            var data = await GetById(id);
+            if (data != null)
+            {
+                var result = await _userService.Update(id, model);
+                return result;
+            }
+            return false;
         }
 
-        public async Task<(string, bool)> Login(Login login)
+        public async Task<(string, bool, User)> Login(Login login)
         {
             return await _userService.Login(login);
         }
