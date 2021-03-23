@@ -5,6 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using vegit_backend_api.Interfaces;
+using vegit_backend_api.Repository;
+using vegit_backend_api.Repository.Abstract;
 using vegit_backend_api.Services;
 using vegit_backend_api.Services.Abstract;
 using vegit_backend_api.Services.Helpers;
@@ -26,7 +28,9 @@ namespace vegit_backend_api
             services.AddControllers();
 
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IIngredientRepository, IngredientRepository>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IIngredientService, IngredientService>();
             services.AddSingleton<IConfiguration>(Configuration);
 
             SqlHelper.connectionString = Configuration.GetConnectionString("ProdDBConnection");
