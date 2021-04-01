@@ -9,6 +9,7 @@ namespace vegit_backend_api.Services.Abstract
     public interface IIngredientService : IService<IngredientModel>
     {
         Task<List<IngredientModel>> GetByDataSource(int dataSource);
+        Task<List<SearchSingle>> GetNames();
         Task<IngredientModel> SearchIngredient(SearchSingle single);
         Task<List<IngredientModel>> SearchIngredientList(List<SearchSingle> searchList);
     }

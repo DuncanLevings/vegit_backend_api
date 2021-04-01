@@ -46,6 +46,16 @@ namespace vegit_backend_api.Repository
             return null;
         }
 
+        public async Task<List<SearchSingle>> GetNames()
+        {
+            var data = await _ingredientService.GetNames();
+            if (data != null)
+            {
+                return data;
+            }
+            return null;
+        }
+
         public async Task<(string, bool, IngredientModel model)> Add(IngredientModel model)
         {
             return await _ingredientService.Add(model);

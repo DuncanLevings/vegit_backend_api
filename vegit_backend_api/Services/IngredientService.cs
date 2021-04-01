@@ -91,6 +91,30 @@ namespace vegit_backend_api.Services
             }
         }
 
+        public async Task<List<SearchSingle>> GetNames()
+        {
+            try
+            {
+                using (IDbConnection connection = new SqlConnection(SqlHelper.connectionString))
+                {
+                    if (connection.State == ConnectionState.Closed) connection.Open();
+
+                    var ingredients = await connection.QueryAsync<SearchSingle>($"SELECT NAME FROM FOODS");
+
+                    if (ingredients != null && ingredients.Count() > 0)
+                    {
+                        return ingredients.ToList();
+                    }
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
+
         public async Task<(string, bool, IngredientModel model)> Add(IngredientModel model)
         {
             try

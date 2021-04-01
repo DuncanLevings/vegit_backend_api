@@ -49,6 +49,13 @@ namespace vegit_backend_api.Controllers
             return StatusCode(200, ingredientList);
         }
 
+        [HttpGet("/ingredients/getnames")]
+        public async Task<ActionResult> GetNames()
+        {
+            var ingredientList = await _ingredientRepository.GetNames();
+            return StatusCode(200, ingredientList);
+        }
+
         [HttpPost("/ingredients/add")]
         public async Task<ActionResult> Add([FromBody] IngredientModel ingredient)
         {

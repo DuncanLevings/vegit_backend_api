@@ -35,7 +35,7 @@ namespace vegit_backend_api
 
             SqlHelper.connectionString = Configuration.GetConnectionString("ProdDBConnection");
 
-            services.AddSwaggerGen();
+            //services.AddSwaggerGen();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,12 +51,12 @@ namespace vegit_backend_api
                 app.UseHttpsRedirection();
             }
 
-            app.UseSwagger();
+            //app.UseSwagger();
 
-            app.UseSwaggerUI(c =>
+            /*app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "V1");
-            });
+            });*/
 
             app.UseRouting();
 
