@@ -199,31 +199,20 @@ namespace vegit_backend_api.Services
                 {
                     if (connection.State == ConnectionState.Closed) connection.Open();
 
+                    single.name = removePlural(single.name);
+
                     // start search at data source 4 and decrementing data source until result is found
                     // exact word search
                     for (int i = 4; i > 0; i--)
                     {
                         var ingredient = await connection.QueryAsync<IngredientModel>($"SELECT TOP 1 F.ID, F.NAME, F.DIET_TYPE, D.NAME AS DIET_NAME, D.LEVEL AS DIET_LEVEL, " +
-                        $"F.DESCRIPTION, F.[GROUP], F.SUB_GROUP, F.DATA_SOURCE FROM FOODS F INNER JOIN DIET_TYPES D ON(F.DIET_TYPE = D.ID) WHERE DATA_SOURCE = {i} AND F.NAME LIKE '{single.name}'");
+                        $"F.DESCRIPTION, F.[GROUP], F.SUB_GROUP, F.DATA_SOURCE FROM FOODS F INNER JOIN DIET_TYPES D ON(F.DIET_TYPE = D.ID) WHERE DATA_SOURCE = {i} AND F.NAME LIKE '{single.name}' OR F.NAME LIKE '%{single.name}%'");
 
                         if (ingredient != null && ingredient.Count() > 0)
                         {
                             return ingredient.FirstOrDefault();
                         }
                     }
-
-                    // wild card search
-                    for (int i = 4; i > 0; i--)
-                    {
-                        var ingredient = await connection.QueryAsync<IngredientModel>($"SELECT TOP 1 F.ID, F.NAME, F.DIET_TYPE, D.NAME AS DIET_NAME, D.LEVEL AS DIET_LEVEL, " +
-                        $"F.DESCRIPTION, F.[GROUP], F.SUB_GROUP, F.DATA_SOURCE FROM FOODS F INNER JOIN DIET_TYPES D ON(F.DIET_TYPE = D.ID) WHERE DATA_SOURCE = {i} AND F.NAME LIKE '%{single.name}%'");
-
-                        if (ingredient != null && ingredient.Count() > 0)
-                        {
-                            return ingredient.FirstOrDefault();
-                        }
-                    }
-
                     return null;
                 }
             }
@@ -290,23 +279,53 @@ namespace vegit_backend_api.Services
             DynamicParameters parameters = new DynamicParameters();
             StringBuilder sb = new StringBuilder();
 
+            int size = searchList.Count;
             List<string> nameList = new List<string>();
+            String[] delimiterChars = { " ", "-" };
             foreach (SearchSingle item in searchList)
             {
                 var name = item.name.Trim();
-                nameList.Add(name);
+                
+                if (name.IndexOf(" ") != -1 || name.IndexOf("-") != -1)
+                {
+                    string[] names = name.Split(delimiterChars, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (String n in names)
+                    {
+                        String _n = removePlural(n);
+                        nameList.Add(_n.Trim());
 
-                sb.AppendFormat("\"{0}\" OR ", name);
+                        sb.AppendFormat("\"{0}\" OR ", _n.Trim());
+
+                        size++;
+                    }
+                }
+
+                String _name = removePlural(name);
+                nameList.Add(_name);
+                sb.AppendFormat("\"{0}\" OR ", _name);
             }
-
+            
             sb.Length -= 4; // removes last OR
-            string searchSplit = String.Join(",", nameList);
+            string searchSplit = string.Join(",", nameList);
 
             parameters.Add("@searchList", sb.ToString());
             parameters.Add("@searchSplit", searchSplit);
-            parameters.Add("@size", searchList.Count);
+            parameters.Add("@size", size);
 
             return parameters;
+        }
+
+        private string removePlural(string name)
+        {
+            if (name.EndsWith("ies"))
+            {
+                name = name.Substring(0, name.Length - 3);
+            }
+            else if (name.EndsWith("s"))
+            {
+                name = name.Substring(0, name.Length - 1);
+            }
+            return name;
         }
     }
 }
