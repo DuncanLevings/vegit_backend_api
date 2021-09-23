@@ -344,7 +344,7 @@ namespace vegit_backend_api.Services
                     }
                 }
 
-                if (bestScore < 3 && bestMatch != null) 
+                if (bestScore < 5 && bestMatch != null) 
                 {
                     bestResults.Add(bestMatch);
                 } else
@@ -357,7 +357,7 @@ namespace vegit_backend_api.Services
             return bestResults;
         }
 
-        private IngredientModel createUnknownIngredient(String name)
+        private IngredientModel createUnknownIngredient(string name)
         {
             return new IngredientModel
             {
