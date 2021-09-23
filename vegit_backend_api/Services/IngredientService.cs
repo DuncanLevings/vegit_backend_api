@@ -238,10 +238,9 @@ namespace vegit_backend_api.Services
                                 param,
                                 commandType: CommandType.StoredProcedure);
 
-                    
                     if (ingredients != null && ingredients.Count() > 0)
                     {
-                        return ingredients.ToList();
+                        return computeBestMatch(searchList, ingredients.ToList());
                     }
                     return null;
                 }
@@ -279,8 +278,6 @@ namespace vegit_backend_api.Services
             DynamicParameters parameters = new DynamicParameters();
             StringBuilder sb = new StringBuilder();
 
-            int size = searchList.Count;
-            List<string> nameList = new List<string>();
             String[] delimiterChars = { " ", "-" };
             foreach (SearchSingle item in searchList)
             {
@@ -292,25 +289,18 @@ namespace vegit_backend_api.Services
                     foreach (String n in names)
                     {
                         String _n = removePlural(n);
-                        nameList.Add(_n.Trim());
 
                         sb.AppendFormat("\"{0}\" OR ", _n.Trim());
-
-                        size++;
                     }
                 }
 
                 String _name = removePlural(name);
-                nameList.Add(_name);
                 sb.AppendFormat("\"{0}\" OR ", _name);
             }
             
             sb.Length -= 4; // removes last OR
-            string searchSplit = string.Join(",", nameList);
 
             parameters.Add("@searchList", sb.ToString());
-            parameters.Add("@searchSplit", searchSplit);
-            parameters.Add("@size", size);
 
             return parameters;
         }
@@ -326,6 +316,56 @@ namespace vegit_backend_api.Services
                 name = name.Substring(0, name.Length - 1);
             }
             return name;
+        }
+
+        private List<IngredientModel> computeBestMatch(List<SearchSingle> searchList, List<IngredientModel> initialResults)
+        {
+            List<IngredientModel> bestResults = new List<IngredientModel>();
+            IngredientModel bestMatch = null;
+            int bestScore = 9999999;
+            foreach (SearchSingle item in searchList)
+            {
+                foreach (IngredientModel ingredient in initialResults)
+                {
+                    string name = ingredient.name.Replace("-", "").ToLower();
+                    string target = item.name.Replace("-", "").ToLower();
+                    int score = Levenshtein.ComputeDistance(name, target);
+                    if (score <= bestScore)
+                    {
+                        bestScore = score;
+                        bestMatch = ingredient;
+                    }
+
+                    // best possible match, exit out here
+                    if (score == 0)
+                    {
+                        bestMatch = ingredient;
+                        break;
+                    }
+                }
+
+                if (bestScore < 3 && bestMatch != null) 
+                {
+                    bestResults.Add(bestMatch);
+                } else
+                {
+                    bestResults.Add(createUnknownIngredient(item.name));
+                }
+                bestScore = 9999999;
+                bestMatch = null;
+            }
+            return bestResults;
+        }
+
+        private IngredientModel createUnknownIngredient(String name)
+        {
+            return new IngredientModel
+            {
+                name = name,
+                diet_type = 5,
+                diet_name = "Unspecified",
+                diet_level = 1
+            };
         }
     }
 }
