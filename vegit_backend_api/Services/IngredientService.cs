@@ -354,7 +354,8 @@ namespace vegit_backend_api.Services
                 bestScore = 9999999;
                 bestMatch = null;
             }
-            return bestResults;
+
+            return bestResults.OrderBy(o => o.diet_type).ToList();
         }
 
         private IngredientModel createUnknownIngredient(string name)
